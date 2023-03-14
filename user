@@ -1,0 +1,34 @@
+- name: User
+  hosts: localhost
+  connection: local
+
+  vars:
+    username: your-new-username
+    namespace: your-namespace
+    kubeconfig: /path/to/your/kubeconfig
+
+  tasks:
+    - name: Create a service account
+      k8s:
+        kubeconfig: "{{ kubeconfig }}"
+        state: present
+        kind: ServiceAccount
+        name: "{{ username }}"
+        namespace: "{{ namespace }}"
+
+    - name: Bind the service account to the pod permissions
+      k8s:
+        kubeconfig: "{{ kubeconfig }}"
+        state: present
+        api_version: rbac.authorization.k8s.io/v1
+        kind: RoleBinding
+        name: "{{ username }}-pod-permissions"
+        namespace: "{{ namespace }}"
+        role_ref:
+          api_group: rbac.authorization.k8s.io
+          kind: ClusterRole
+          name: pod
+        subjects:
+        - kind: ServiceAccount
+          name: "{{ username }}"
+          namespace: "{{ namespace }}"
