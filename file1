@@ -1,0 +1,51 @@
+provider "aws" {
+  # Configuration options
+  region     = "us-east-1"
+  access_key = "ASIASKUA6UC3I7FQDCNO"
+  secret_key = "IfUYPHlFUMaZWE32eVOM17aq/LzPD9JbHPKE04JR"
+  token = "FwoGZXIvYXdzEOP//////////wEaDG6fOjluKhMgdh0IGyK4AZfQKDYhFaajS/rfZBcpZva19VzBlsbCenGc8LBRIo+Ew6UBApY+uhyfG8hhpivz8EdLNxuCIsRkX/IRe1jXXkfyUjo+xmRrethCOKzsLGw03QbwefwZf21mQpaEdXUNUb8PXVOdhtN6OsUTVgEDN/Z7Ck5MhiZuWUCBvFxMfpxyOXna0UqewFNXNyX0/PoMuKtZo2Wz3vwoJqBPsoxqtZWz5zglJCBP8jcGkQiozNkAfQV1t7EFWpUox+i2nAYyLWQt/not7IrzVbW8u/1LlbLaKcQqYRqZZJgN+omPeUZkOcdV5BItqvtmqy7LiQ=="
+}
+
+terraform {
+  required_providers {
+    aws = {
+      source = "hashicorp/aws"
+      version = "4.40.0"
+    }
+  }
+}
+
+
+resource "aws_key_pair" "deployer" {
+  key_name   = "cep1"
+  public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDR6Mn83QvcdCCnDlo9+gIYaQnnjW3B/sRwzPE3HI4ICZe2vkMfNbl9DSgu9w9+GdkqYkrtmRn2ajnnueLEDXbV1Gr++05S0eoPsG1ToqeMA4SNlXMqN7ZuyMhG+XoXkO10tFnZfgsPHQIWrrM8Mqy6atjFfwG7gZhsmmZUo3ZscJafxf+eLPOLjHKeqkzxcEopYoRbwtS7u+jBb2q7217mqgPujlx1h6PvNxzmsOHtFFdETkfY1va7vorpGr2hWfyyfKeEje+MA3QhEy1Iw6cjCSa8XGSwzrPgDZ5IwZztE+qFHeeFl4ikukcD//s/AK2BgWKu890z9dPaxwqTiQA5pwLPxhtsuMHTHF4bsnZUv8IQqw1B6aSrpWIRIwTCjbLoNmprHi66RJmesHMlH7zJ+/0lAwpmIpq2Tf/shN3Sg89IGhokZd88hPXOFqM6K5U6ElCYono5MP8f+Ifan63nu7RHXvzbj5cVoHFIQZ+IFC7D4yNRSGlFYK+0UCpUDoE= akk18mail@ip-172-31-17-176"
+
+resource "aws_security_group" "sg" {
+  name        = "sgcep1"
+  description = "Allow All Traffic"
+  ingress {
+    from_port        = 0
+    to_port          = 0
+    protocol         = "-1"
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
+  egress {
+    from_port        = 0
+    to_port          = 0
+    protocol         = "-1"
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
+}
+
+
+resource "aws_instance" "web" {
+  ami           = "ami-08c40ec9ead489470"
+  instance_type = "t2.micro"
+  tags = {
+    Name = "CEP1"
+  }
+  key_name = "cep1"
+  security_groups = ["sgcep1"]
+}
