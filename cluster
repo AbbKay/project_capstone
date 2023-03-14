@@ -1,0 +1,44 @@
+---
+- hosts: all
+  become: true
+
+  tasks:
+    - name: Install Docker
+      apt:
+        name: docker.io
+        state: present
+
+    - name: Add user to Docker group
+      user:
+        name: "{{ ansible_user }}"
+        groups: docker
+
+    - name: Install kubeadm, kubelet, and kubectl
+      apt:
+        name:
+          - apt-transport-https
+          - curl
+          - gnupg-agent
+          - software-properties-common
+      register: apt_update_result
+
+    - name: Add Kubernetes GPG key
+      apt_key:
+        url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+        state: present
+
+    - name: Add Kubernetes repository
+      apt_repository:
+        repo: deb https://apt.kubernetes.io/ kubernetes-xenial main
+        state: present
+        filename: kubernetes.list
+        update_cache: "{{ apt_update_result.changed }}"
+
+    - name: Install Kubernetes packages
+      apt:
+        name:
+          - kubelet
+          - kubeadm
+          - kubectl
+        state: present
+        update_cache: "{{ apt_update_result.changed }}"
